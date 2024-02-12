@@ -1,0 +1,28 @@
+package de.mknblch.binlib.types.primitives
+
+import de.mknblch.binlib.BinLib
+import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
+import java.nio.ByteBuffer
+
+/**
+ * returns data ar raw byte array.
+ * The size of the byte array to be read can be fixed or dynamic. If a fixed size is specified,
+ * it will read exactly that number of bytes from the buffer. Otherwise, it will read all remaining
+ * bytes in the buffer.
+ */
+class ByteArrayType(val size: Int?) : BinLib.Type<ByteArray> {
+    override fun read(buffer: ByteBuffer): ByteArray {
+        val len = size ?: buffer.remaining()
+        val byteArray = ByteArray(len)
+        buffer.get(byteArray)
+        return byteArray
+    }
+
+    override fun write(buffer: ByteBuffer, value: ByteArray): Int {
+        buffer.put(value)
+        return value.size
+    }
+
+    override fun size(): Int = SIZE_UNDEFINED
+
+}

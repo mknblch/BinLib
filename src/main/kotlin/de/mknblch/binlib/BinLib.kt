@@ -3,6 +3,7 @@ package de.mknblch.binlib
 import de.mknblch.binlib.types.ArrayType
 import de.mknblch.binlib.types.BitFields
 import de.mknblch.binlib.types.Structure
+import de.mknblch.binlib.types.primitives.ByteArrayType
 import java.nio.ByteBuffer
 import kotlin.experimental.or
 
@@ -99,6 +100,8 @@ class BinLib {
         fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields<String> = BitFields.build(types.toList())
 
         fun <T: Any> array(length: Int, type: Type<T>) = ArrayType(length, type)
+
+        fun byteArray(length: Int?) = ByteArrayType(length)
 
         /**
          * transform a boolean array into a Long using 2-complement
