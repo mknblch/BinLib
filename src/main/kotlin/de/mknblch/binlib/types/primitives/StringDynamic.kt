@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets
  * Reads a null terminated string and increments the buffers position to the end of the string (including null byte).
  * Throws an exception if maxLength is reached during read.
  */
-open class StringDynamic(private val maxLength: Int = 1024, val charset: Charset = StandardCharsets.US_ASCII) :
+open class StringDynamic(private val maxLength: Int = Int.MAX_VALUE, val charset: Charset = StandardCharsets.US_ASCII) :
     BinLib.Type<String> {
     override fun read(buffer: ByteBuffer): String {
         val startPosition = buffer.position()
