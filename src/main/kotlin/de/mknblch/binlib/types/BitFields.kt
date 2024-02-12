@@ -58,7 +58,7 @@ class BitFields<K : Any>(private val elements: Array<Pair<K, BitField<Any>>>) : 
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun <K : Any> build(vararg elementTypes: Pair<K, BitField<*>>): BitFields<K> =
-            BitFields(elementTypes.asList().map { it as Pair<K, BitField<Any>> }.toTypedArray())
+        fun <K : Any> build(elementTypes: List<Pair<K, BitField<*>>>): BitFields<K> =
+            BitFields(elementTypes.map { it as Pair<K, BitField<Any>> }.toTypedArray())
     }
 }

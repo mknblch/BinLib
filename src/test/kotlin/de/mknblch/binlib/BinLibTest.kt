@@ -1,5 +1,7 @@
 package de.mknblch.binlib
 
+import de.mknblch.binlib.BinLib.Companion.bitfield
+import de.mknblch.binlib.BinLib.Companion.struct
 import de.mknblch.binlib.extensions.flatten
 import de.mknblch.binlib.extensions.toHex
 import de.mknblch.binlib.types.*
@@ -16,40 +18,40 @@ import java.util.stream.Stream
 
 class BinLibTest {
 
-    private val int3Struct: Structure<String> = Structure.build(
+    private val int3Struct: Structure<String> = struct(
         "i32" to Int32,
         "i16" to Int16,
         "i8" to Int8,
     )
 
-    private val containerStruct = Structure.build(
+    private val containerStruct = struct(
         "i8" to Int8,
         "struct" to int3Struct,
     )
 
-    private val dynStringStruct = Structure.build(
+    private val dynStringStruct = struct(
         "i1" to Int8,
         "string" to StringDynamic(),
         "i2" to Int8,
     )
 
-    private val exactStringStruct = Structure.build(
+    private val exactStringStruct = struct(
         "i1" to Int8,
         "string" to StringExact(5),
         "i2" to Int8,
     )
 
-    private val bitFields = BitFields.build(
+    private val bitFields = bitfield(
         "pad" to BInt(3),
         "i8" to BInt8,
         "pad2" to BInt(3),
     )
 
-    private val arrayType = Structure.build(
+    private val arrayType = struct(
         "array" to ArrayType(5, Int8)
     )
 
-    private val dynamicStringArray = Structure.build(
+    private val dynamicStringArray = struct(
         "array" to ArrayType(2, Ascii())
     )
 

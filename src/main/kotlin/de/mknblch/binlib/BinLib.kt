@@ -1,10 +1,8 @@
 package de.mknblch.binlib
 
-import java.nio.BufferOverflowException
+import de.mknblch.binlib.types.BitFields
+import de.mknblch.binlib.types.Structure
 import java.nio.ByteBuffer
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 class BinLib {
@@ -94,6 +92,10 @@ class BinLib {
 
 
     companion object {
+
+        fun struct(vararg types: Pair<String, Type<*>>): Structure<String> = Structure.build(types.toList())
+
+        fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields<String> = BitFields.build(types.toList())
 
         /**
          * transform a boolean array into a Long using 2-complement

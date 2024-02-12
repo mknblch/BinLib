@@ -39,7 +39,7 @@ class Structure<K : Any>(private val elements: Array<Pair<K, Type<Any>>>) : Type
     companion object {
 
         @Suppress("UNCHECKED_CAST")
-        fun <K : Any> build(vararg elementTypes: Pair<K, Type<*>>): Structure<K> =
-            Structure(elementTypes.asList().map { it as Pair<K, Type<Any>> }.toTypedArray())
+        fun <K : Any> build(elementTypes: List<Pair<K, Type<*>>>): Structure<K> =
+            Structure(elementTypes.map { it as Pair<K, Type<Any>> }.toTypedArray())
     }
 }
