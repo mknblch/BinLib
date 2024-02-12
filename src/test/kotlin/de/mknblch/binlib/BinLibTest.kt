@@ -52,7 +52,7 @@ class BinLibTest {
     )
 
     private val dynamicStringArray = struct(
-        "array" to ArrayType(2, Ascii())
+        "array" to ArrayType(2, Ascii(5))
     )
 
     @ParameterizedTest

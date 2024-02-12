@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets
  * with null bytes. If the buffer has not enough space
  * for the null terminator it won't be written
  */
-class StringExact(private val length: Int, val charset: Charset = StandardCharsets.US_ASCII) : BinLib.Type<String> {
+open class StringExact(private val length: Int, val charset: Charset = StandardCharsets.US_ASCII) : BinLib.Type<String> {
 
     override fun read(buffer: ByteBuffer): String {
         val startPosition = buffer.position()

@@ -1,5 +1,6 @@
 package de.mknblch.binlib
 
+import de.mknblch.binlib.types.ArrayType
 import de.mknblch.binlib.types.BitFields
 import de.mknblch.binlib.types.Structure
 import java.nio.ByteBuffer
@@ -96,6 +97,8 @@ class BinLib {
         fun struct(vararg types: Pair<String, Type<*>>): Structure<String> = Structure.build(types.toList())
 
         fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields<String> = BitFields.build(types.toList())
+
+        fun <T: Any> array(length: Int, type: Type<T>) = ArrayType(length, type)
 
         /**
          * transform a boolean array into a Long using 2-complement
