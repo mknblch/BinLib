@@ -7,8 +7,7 @@ import kotlin.math.pow
 
 // Float as Double
 object Float4 : BinLib.Type<Double> {
-    override fun read(buffer: ByteBuffer): Double? =
-        if (buffer.hasRemaining(4)) buffer.float.toDouble() else null
+    override fun read(buffer: ByteBuffer): Double = buffer.float.toDouble()
 
     override fun write(buffer: ByteBuffer, value: Double): Int {
         buffer.putFloat(value.toFloat())

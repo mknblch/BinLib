@@ -2,6 +2,7 @@ package de.mknblch.binlib.types.primitives
 
 import de.mknblch.binlib.BinLib
 import de.mknblch.binlib.extensions.hasRemaining
+import de.mknblch.binlib.extensions.toHex
 import java.nio.BufferOverflowException
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
@@ -32,7 +33,7 @@ open class StringExact(private val length: Int, val charset: Charset = StandardC
 
     override fun write(buffer: ByteBuffer, value: String): Int {
         if (value.length > length) {
-            throw IllegalArgumentException("String length exceeds the specified length of $length")
+            throw IllegalArgumentException("String length(${value.length}) exceeds the specified length of $length")
         }
         val bytes = value.toByteArray(charset)
         if (!buffer.hasRemaining(bytes.size)) throw BufferOverflowException()
@@ -58,7 +59,8 @@ open class StringExact(private val length: Int, val charset: Charset = StandardC
          * @return position of next null byte or null if not found
          */
         fun findNullByteOffset(buffer: ByteBuffer, startPosition: Int = buffer.position(), maxLength: Int = 0x0FFFF): Int? {
-            for (i in 0..< maxLength) {
+            val len = maxLength.coerceAtMost(buffer.remaining())
+            for (i in 0..< len) {
                 if (buffer[i + startPosition] == NULL) return i
             }
             return null

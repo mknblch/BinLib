@@ -16,8 +16,9 @@ class BinLib {
          * @param buffer
          * @return value parsed from the buffer
          * @throws IllegalArgumentException
+         * @throws java.nio.BufferUnderflowException
          */
-        fun read(buffer: ByteBuffer): T?
+        fun read(buffer: ByteBuffer): T
 
         /**
          * write value to the buffer
@@ -50,6 +51,8 @@ class BinLib {
          * encode value into a boolean array
          */
         abstract fun encode(value: Any): BooleanArray
+
+
     }
 
     /**
@@ -57,14 +60,14 @@ class BinLib {
      */
     abstract class TypeDecorator<I: Any, O: Any>(private val parent: BinLib.Type<I>) : BinLib.Type<O> {
 
-        override fun read(buffer: ByteBuffer): O? = decorateRead(parent.read(buffer))
+        override fun read(buffer: ByteBuffer): O = decorateRead(parent.read(buffer))
         override fun write(buffer: ByteBuffer, value: O): Int = parent.write(buffer, decorateWrite(value))
         override fun size(): Int = parent.size()
 
         /**
          * map result value from parent type into target type
          */
-        abstract fun decorateRead(input: I?): O?
+        abstract fun decorateRead(input: I): O
 
         /**
          * map input value to parent type
@@ -101,7 +104,29 @@ class BinLib {
 
         fun <T: Any> array(length: Int, type: Type<T>) = ArrayType(length, type)
 
-        fun byteArray(length: Int?) = ByteArrayType(length)
+        fun byteArray(length: Int? = null) = ByteArrayType(length)
+
+        fun <I: Any, O: Any> BitField<I>.decorate(
+            readDecorator: (I) -> O,
+            writeDecorator: (O) -> I
+        ): BitFieldDecorator<I, O> {
+            return object : BitFieldDecorator<I, O>(this) {
+                override fun decorateRead(input: I): O = readDecorator(input)
+
+                @Suppress("UNCHECKED_CAST")
+                override fun decorateWrite(input: Any): I = writeDecorator(input as O)
+            }
+        }
+
+        fun <I: Any, O: Any> Type<I>.decorate(
+            readDecorator: (I) -> O,
+            writeDecorator: (O) -> I
+        ): TypeDecorator<I, O> {
+            return object : TypeDecorator<I, O>(this) {
+                override fun decorateRead(input: I): O = readDecorator(input)
+                override fun decorateWrite(input: O): I = writeDecorator(input)
+            }
+        }
 
         /**
          * transform a boolean array into a Long using 2-complement
@@ -119,6 +144,13 @@ class BinLib {
         fun Int.toBooleanArray(size: Int = 32): BooleanArray {
             val result = BooleanArray(size) { i ->
                 this shr i and 1 == 1
+            }
+            return result
+        }
+
+        fun Long.toBooleanArray(size: Int = 64): BooleanArray {
+            val result = BooleanArray(size) { i ->
+                this shr i and 1L == 1L
             }
             return result
         }

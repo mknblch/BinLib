@@ -1,19 +1,28 @@
 package de.mknblch.binlib
 
 import de.mknblch.binlib.BinLib.Companion.bitfield
+import de.mknblch.binlib.BinLib.Companion.decorate
 import de.mknblch.binlib.BinLib.Companion.struct
 import de.mknblch.binlib.extensions.flatten
 import de.mknblch.binlib.extensions.toHex
 import de.mknblch.binlib.types.*
+import de.mknblch.binlib.types.bitfields.BFloat4
 import de.mknblch.binlib.types.bitfields.BInt
 import de.mknblch.binlib.types.bitfields.BInt8
 import de.mknblch.binlib.types.primitives.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.stream.Stream
+import kotlin.math.PI
 
 
 class BinLibTest {
@@ -53,6 +62,13 @@ class BinLibTest {
 
     private val dynamicStringArray = struct(
         "array" to ArrayType(2, Ascii(5))
+    )
+
+    private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") //.withZone(ZoneId.systemDefault())
+
+    private val dateEncoder = Ascii(19).decorate(
+        formatter::parse,
+        formatter::format
     )
 
     @ParameterizedTest
@@ -129,10 +145,53 @@ class BinLibTest {
             )
         )
         buffer.flip()
+        println(buffer.toHex())
         val map = dynStringStruct.read(buffer)
         assertEquals("!", map["string"])
         assertEquals(0x0F, map["i1"])
         assertEquals(0x0F, map["i2"])
+    }
+
+    @ParameterizedTest
+    @MethodSource("byteOrder")
+    fun testDynamicStringNoNT(order: ByteOrder) {
+        val buffer = ByteBuffer.allocate(2) // 2 bytes
+        buffer.order(order)
+        val stringDynamic = struct(
+            "string" to StringDynamic(1), // one char not null terminated!
+            "pad" to UInt8
+        )
+        stringDynamic.write(buffer, mapOf(
+            "string" to "!",
+            "pad" to 0x0F
+        ))
+        buffer.flip()
+        assertEquals(2, buffer.remaining())
+        println(buffer.toHex())
+        val map = stringDynamic.read(buffer)
+        assertEquals("!", map["string"])
+        assertEquals(0x0F, map["pad"])
+    }
+
+    @ParameterizedTest
+    @MethodSource("byteOrder")
+    fun testDynamicStringNT(order: ByteOrder) {
+        val buffer = ByteBuffer.allocate(3) // 3 bytes
+        buffer.order(order)
+        val stringDynamic = struct(
+            "string" to StringDynamic(2), // one chat and null terminator
+            "pad" to UInt8
+        )
+        stringDynamic.write(buffer, mapOf(
+            "string" to "!",
+            "pad" to 0x0F
+        ))
+        buffer.flip()
+        assertEquals(3, buffer.remaining())
+        println(buffer.toHex())
+        val map = stringDynamic.read(buffer)
+        assertEquals("!", map["string"])
+        assertEquals(0x0F, map["pad"])
     }
 
     @ParameterizedTest
@@ -228,6 +287,33 @@ class BinLibTest {
         assertEquals(2, array.size)
         assertEquals("hello", array[0])
         assertEquals("world", array[1])
+    }
+
+    @Test
+    fun testBitFieldDecorator() {
+
+        val buffer = ByteBuffer.allocate(12)
+        val field = bitfield(
+            "pi" to BFloat4.decorate(
+                Float::toInt,
+                Int::toFloat
+            )
+        )
+
+        field.write(buffer, mapOf("pi" to 3))
+        buffer.flip()
+        println(buffer.toHex())
+        val map = field.read(buffer)
+        assertEquals(3, map["pi"])
+    }
+
+    @Test
+    fun testTypeDecorator() {
+        val dateTime = Instant.now().atOffset(ZoneOffset.UTC)
+        val buffer = ByteBuffer.allocate(19)
+        dateEncoder.write(buffer, dateTime)
+        buffer.flip()
+        assertEquals(formatter.format(dateTime), formatter.format(dateEncoder.read(buffer)))
     }
 
     companion object {

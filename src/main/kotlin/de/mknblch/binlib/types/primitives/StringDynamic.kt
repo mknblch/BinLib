@@ -14,20 +14,27 @@ open class StringDynamic(private val maxLength: Int = Int.MAX_VALUE, val charset
     BinLib.Type<String> {
     override fun read(buffer: ByteBuffer): String {
         val startPosition = buffer.position()
-        val nullByteOffset = findNullByteOffset(buffer, startPosition) ?: throw IllegalArgumentException("Null terminator not found")
+        // convert rest of the buffer into a string if no null terminator is found
+        val nullByteOffset = findNullByteOffset(buffer, startPosition) ?: maxLength.coerceAtMost(buffer.remaining())
         val bytes = ByteArray(nullByteOffset)
         buffer.get(bytes)
-        if(buffer.get() != NULL) throw IllegalArgumentException("Null terminator not found")
+        // if we did not read to the end of the buffer there must be a null terminator
+        if(buffer.hasRemaining() && buffer.position() - startPosition < maxLength) {
+            require( buffer.get() == NULL) { "Null byte terminator not found in $buffer" }
+        }
         return String(bytes, charset)
     }
 
     override fun write(buffer: ByteBuffer, value: String): Int {
-        if (value.length >= maxLength) {
-            throw IllegalArgumentException("String length exceeds maximum length of ${maxLength - 1}")
+        if (value.length > maxLength) {
+            throw IllegalArgumentException("String length exceeds maximum length of $maxLength")
         }
         val bytes = value.toByteArray(charset)
         buffer.put(bytes)
-        buffer.put(0.toByte()) // Null terminator
+        // append null terminator if space is left
+        if (buffer.hasRemaining() && bytes.size < maxLength) {
+            buffer.put(0.toByte()) // Null terminator
+        }
         return bytes.size + 1 // Include null terminator in count
     }
 
@@ -43,7 +50,7 @@ open class StringDynamic(private val maxLength: Int = Int.MAX_VALUE, val charset
          * @return position of next null byte or null if not found
          */
         fun findNullByteOffset(buffer: ByteBuffer, startPosition: Int = buffer.position(), maxLength: Int = 0x0FFFF): Int? {
-            for (i in 0..< maxLength) {
+            for (i in 0..< maxLength.coerceAtMost(buffer.remaining())) {
                 if (buffer[i + startPosition] == NULL) return i
             }
             return null

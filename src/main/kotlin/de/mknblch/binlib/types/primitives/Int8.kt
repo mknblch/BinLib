@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 
 // Int8
 object Int8 : BinLib.Type<Int> {
-    override fun read(buffer: ByteBuffer): Int? = if (buffer.hasRemaining()) buffer.get().toInt() else null
+    override fun read(buffer: ByteBuffer): Int = buffer.get().toInt()
     override fun write(buffer: ByteBuffer, value: Int): Int {
         buffer.put(value.toByte())
         return Byte.SIZE_BYTES
