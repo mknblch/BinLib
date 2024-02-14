@@ -12,10 +12,9 @@ import java.nio.ByteBuffer
  */
 class ByteArrayType(val size: Int?) : BinLib.Type<ByteArray> {
     override fun read(buffer: ByteBuffer): ByteArray {
-        val len = size ?: buffer.remaining()
-        val byteArray = ByteArray(len)
-        buffer.get(byteArray)
-        return byteArray
+        return ByteArray(size ?: buffer.remaining()).also {
+            buffer.get(it)
+        }
     }
 
     override fun write(buffer: ByteBuffer, value: ByteArray): Int {
@@ -23,6 +22,6 @@ class ByteArrayType(val size: Int?) : BinLib.Type<ByteArray> {
         return value.size
     }
 
-    override fun size(): Int = SIZE_UNDEFINED
+    override fun size(): Int = size ?: SIZE_UNDEFINED
 
 }

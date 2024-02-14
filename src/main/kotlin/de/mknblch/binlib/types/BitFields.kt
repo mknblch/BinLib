@@ -1,40 +1,38 @@
 package de.mknblch.binlib.types
 
 import de.mknblch.binlib.BinLib.BitField
+import de.mknblch.binlib.BinLib.Companion.requireState
 import de.mknblch.binlib.BinLib.Companion.toByteArray
 import de.mknblch.binlib.BinLib.Type
+import de.mknblch.binlib.extensions.hasRemaining
 import java.nio.ByteBuffer
 import kotlin.experimental.and
 
 /**
  * Bitfield mapper implementation
  */
-class BitFields<K : Any>(private val elements: Array<Pair<K, BitField<Any>>>) : Type<Map<K, Any>> {
+class BitFields(private val elements: Array<Pair<String, BitField<Any>>>) : Type<Map<String, Any>> {
 
-    private fun readArray(buffer: ByteBuffer, numBits: Int, startBit: Int = 0): BooleanArray {
-        val bPos = buffer.position()
-        val ret = BooleanArray(numBits) {
-            val k = it + startBit
-            buffer[k / 8 + bPos].and(bitMask[k % 8]) != ZERO
+    override fun read(buffer: ByteBuffer): Map<String, Any> {
+        requireState(buffer.hasRemaining(size())) {
+            "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})"
         }
-        return ret
-    }
-
-    override fun read(buffer: ByteBuffer): Map<K, Any> {
-        val result = mutableMapOf<K, Any>()
+        val result = mutableMapOf<String, Any>()
         var bitOffset = 0
         elements.forEach { (key, bitField) ->
             val array = readArray(buffer, bitField.numBits, bitOffset)
             result[key] = bitField.decode(array)
             bitOffset += bitField.numBits
         }
-        buffer.position(buffer.position() + (bitOffset + 8 - 1) / 8)
+        buffer.position(buffer.position() + (bitOffset + 7) / 8)
         return result
     }
 
-    override fun write(buffer: ByteBuffer, value: Map<K, Any>): Int {
-        val maxBits = elements.sumOf { it.second.numBits }
-        val array = BooleanArray(maxBits)
+    override fun write(buffer: ByteBuffer, value: Map<String, Any>): Int {
+        val numBits = elements.sumOf { it.second.numBits }
+        val numBytes = (numBits + 7) / 8
+        requireState(buffer.hasRemaining(numBytes)) { "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/$numBytes)" }
+        val array = BooleanArray(numBits)
         var bitOffset = 0
         for ((elementKey, bitField) in elements) {
             val elementValue =
@@ -44,10 +42,10 @@ class BitFields<K : Any>(private val elements: Array<Pair<K, BitField<Any>>>) : 
             bitOffset += bitField.numBits
         }
         buffer.put(array.toByteArray())
-        return (maxBits + 8 - 1) / 8
+        return (numBits + 7) / 8
     }
 
-    override fun size(): Int = (elements.sumOf { it.second.numBits } + 8 - 1) / 8
+    override fun size(): Int = (elements.sumOf { it.second.numBits } + 7) / 8
 
     companion object {
 
@@ -57,8 +55,17 @@ class BitFields<K : Any>(private val elements: Array<Pair<K, BitField<Any>>>) : 
             (0x01 shl it).toByte()
         }
 
+        fun readArray(buffer: ByteBuffer, numBits: Int, startBit: Int = 0): BooleanArray {
+            val bPos = buffer.position()
+            val ret = BooleanArray(numBits) {
+                val k = it + startBit
+                buffer[k / 8 + bPos].and(bitMask[k % 8]) != ZERO
+            }
+            return ret
+        }
+
         @Suppress("UNCHECKED_CAST")
-        fun <K : Any> build(elementTypes: List<Pair<K, BitField<*>>>): BitFields<K> =
-            BitFields(elementTypes.map { it as Pair<K, BitField<Any>> }.toTypedArray())
+        fun build(elementTypes: List<Pair<String, BitField<*>>>): BitFields =
+            BitFields(elementTypes.map { it as Pair<String, BitField<Any>> }.toTypedArray())
     }
 }

@@ -1,5 +1,6 @@
 package de.mknblch.binlib
 
+import de.mknblch.binlib.BinLib.Companion.array
 import de.mknblch.binlib.BinLib.Companion.bitfield
 import de.mknblch.binlib.BinLib.Companion.decorate
 import de.mknblch.binlib.BinLib.Companion.struct
@@ -17,17 +18,14 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.time.Instant
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.stream.Stream
-import kotlin.math.PI
 
 
 class BinLibTest {
 
-    private val int3Struct: Structure<String> = struct(
+    private val int3Struct: Structure = struct(
         "i32" to Int32,
         "i16" to Int16,
         "i8" to Int8,
@@ -57,11 +55,11 @@ class BinLibTest {
     )
 
     private val arrayType = struct(
-        "array" to ArrayType(5, Int8)
+        "array" to array(5, Int8)
     )
 
     private val dynamicStringArray = struct(
-        "array" to ArrayType(2, Ascii(5))
+        "array" to ArrayType(2, StringDynamic(5))
     )
 
     private val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss") //.withZone(ZoneId.systemDefault())
@@ -314,6 +312,21 @@ class BinLibTest {
         dateEncoder.write(buffer, dateTime)
         buffer.flip()
         assertEquals(formatter.format(dateTime), formatter.format(dateEncoder.read(buffer)))
+    }
+
+    @Test
+    fun testNone() {
+        val buffer = ByteBuffer.allocate(2)
+        val structure = struct(
+            "value" to Int8,
+            "end" to None
+        )
+        structure.write(buffer, mapOf(
+            "value" to 0x0F,
+        ))
+        buffer.flip()
+        val map = structure.read(buffer)
+        assertEquals(0x0F, map["value"])
     }
 
     companion object {

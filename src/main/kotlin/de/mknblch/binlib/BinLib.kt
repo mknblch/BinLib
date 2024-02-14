@@ -35,6 +35,13 @@ class BinLib {
          */
         fun size(): Int
 
+        fun signature(): String {
+            val className = this::class.simpleName ?: "?"
+            val typeParams = this::class.typeParameters
+            return if (typeParams.isEmpty()) className else
+                "$className <${typeParams.joinToString { it.name }}>"
+        }
+
     }
 
     /**
@@ -58,7 +65,7 @@ class BinLib {
     /**
      * type decorator
      */
-    abstract class TypeDecorator<I: Any, O: Any>(private val parent: BinLib.Type<I>) : BinLib.Type<O> {
+    abstract class TypeDecorator<I: Any, O: Any>(private val parent: Type<I>) : Type<O> {
 
         override fun read(buffer: ByteBuffer): O = decorateRead(parent.read(buffer))
         override fun write(buffer: ByteBuffer, value: O): Int = parent.write(buffer, decorateWrite(value))
@@ -79,7 +86,7 @@ class BinLib {
     /**
      * bitfield decorator
      */
-    abstract class BitFieldDecorator<I: Any, O: Any>(private val parent: BinLib.BitField<I>) : BinLib.BitField<O>(parent.numBits) {
+    abstract class BitFieldDecorator<I: Any, O: Any>(private val parent: BitField<I>) : BitField<O>(parent.numBits) {
 
         override fun decode(booleanArray: BooleanArray): O = decorateRead(parent.decode(booleanArray))
         override fun encode(value: Any): BooleanArray = parent.encode(decorateWrite(value))
@@ -98,9 +105,9 @@ class BinLib {
 
     companion object {
 
-        fun struct(vararg types: Pair<String, Type<*>>): Structure<String> = Structure.build(types.toList())
+        fun struct(vararg types: Pair<String, Type<*>>): Structure = Structure.build(types.toList())
 
-        fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields<String> = BitFields.build(types.toList())
+        fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields = BitFields.build(types.toList())
 
         fun <T: Any> array(length: Int, type: Type<T>) = ArrayType(length, type)
 
@@ -131,7 +138,7 @@ class BinLib {
         /**
          * transform a boolean array into a Long using 2-complement
          */
-        fun BooleanArray.toLong(): Long {
+        fun BooleanArray.toSignedLong(): Long {
             var r: Long = 0
             if (this[size - 1]) {
                 for (i in indices) if (!this[i]) r = r or (1L shl i)
@@ -155,7 +162,7 @@ class BinLib {
             return result
         }
 
-        fun BooleanArray.toInt(): Int {
+        fun BooleanArray.toSignedInt(): Int {
             var r: Int = 0
             if (this[size - 1]) {
                 for (i in indices) if (!this[i]) r = r or (1 shl i)
@@ -194,11 +201,15 @@ class BinLib {
          * byte to boolean array (size 8)
          */
         fun Byte.toBooleanArray(): BooleanArray {
-            val result = BooleanArray(8)
-            for (i in 0..<8) {
-                result[i] = this.toInt() shr i and 1 == 1
+            val intValue = this.toInt()
+            val result = BooleanArray(8) { i ->
+                intValue shr i and 1 == 1
             }
             return result
+        }
+
+        fun requireState(state: Boolean, messageSupplier: () -> String) {
+            if (!state) throw IllegalStateException(messageSupplier())
         }
 
         const val SIZE_UNDEFINED: Int = -1
