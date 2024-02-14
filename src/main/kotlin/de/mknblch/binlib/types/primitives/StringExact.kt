@@ -1,6 +1,7 @@
 package de.mknblch.binlib.types.primitives
 
 import de.mknblch.binlib.BinLib
+import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
 import de.mknblch.binlib.extensions.hasRemaining
 import de.mknblch.binlib.extensions.toHex
 import java.nio.BufferOverflowException
@@ -46,7 +47,7 @@ open class StringExact(private val length: Int, val charset: Charset = StandardC
         return length // Always return the specified length, indicating the buffer has advanced by this amount
     }
 
-    override fun size(): Int = length
+    override fun size(): Int = SIZE_UNDEFINED
 
 
     companion object {

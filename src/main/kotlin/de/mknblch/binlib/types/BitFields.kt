@@ -1,9 +1,8 @@
 package de.mknblch.binlib.types
 
-import de.mknblch.binlib.BinLib.BitField
+import de.mknblch.binlib.BinLib.*
 import de.mknblch.binlib.BinLib.Companion.requireState
 import de.mknblch.binlib.BinLib.Companion.toByteArray
-import de.mknblch.binlib.BinLib.Type
 import de.mknblch.binlib.extensions.hasRemaining
 import java.nio.ByteBuffer
 import kotlin.experimental.and
@@ -11,7 +10,7 @@ import kotlin.experimental.and
 /**
  * Bitfield mapper implementation
  */
-class BitFields(private val elements: Array<Pair<String, BitField<Any>>>) : Type<Map<String, Any>> {
+class BitFields(val elements: Array<Pair<String, BitField<Any>>>) : MapType {
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         requireState(buffer.hasRemaining(size())) {

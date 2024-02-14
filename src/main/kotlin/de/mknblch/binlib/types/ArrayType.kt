@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 
 
 // Array type
-class ArrayType<T : Any>(private val length: Int, private val type: BinLib.Type<T>) : BinLib.Type<List<T?>> {
+class ArrayType<T : Any>(val length: Int, val type: BinLib.Type<T>) : BinLib.Type<List<T?>> {
 
     override fun read(buffer: ByteBuffer): List<T?> {
         requireState(buffer.hasRemaining(size())) { "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})" }

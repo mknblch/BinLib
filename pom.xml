@@ -6,7 +6,7 @@
 
     <artifactId>binlib</artifactId>
     <groupId>de.mknblch.binlib</groupId>
-    <version>1.0.18-SNAPSHOT</version>
+    <version>1.0.23-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>binlib</name>
@@ -101,6 +101,13 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>1.9.22</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
             <version>1.9.22</version>
             <scope>test</scope>
@@ -123,11 +130,7 @@
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>1.9.22</version>
-        </dependency>
+
     </dependencies>
 
 </project>

@@ -41,8 +41,14 @@ class BinLib {
             return if (typeParams.isEmpty()) className else
                 "$className <${typeParams.joinToString { it.name }}>"
         }
-
     }
+
+    /**
+     * special interface for map types like Structures and BitFields
+     */
+    interface MapType : Type<Map<String, Any>>
+
+
 
     /**
      * abstract type for bitfields

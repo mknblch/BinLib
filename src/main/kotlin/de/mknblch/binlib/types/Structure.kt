@@ -8,7 +8,7 @@ import de.mknblch.binlib.types.primitives.None
 import java.nio.ByteBuffer
 
 // Struct type
-open class Structure(private val elements: Array<Pair<String, Type<Any>>>) : Type<Map<String, Any>> {
+open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         val map = mutableMapOf<String, Any>()
@@ -23,7 +23,16 @@ open class Structure(private val elements: Array<Pair<String, Type<Any>>>) : Typ
         var bytesWritten = 0
         for (i in elements.indices) {
             val (elementKey, elementType) = elements[i]
+            // handle none
             if (elementType is None) continue // skip none
+            // handle optionals
+            if (elementType is OptionalValue<*>) {
+                value[elementKey]?.also {
+                    bytesWritten += elementType.write(buffer, it)
+                }
+                continue
+            }
+            // handle rest
             requireState(buffer.hasRemaining(elementType.size())) { "BufferOverflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})" }
             val element = value[elementKey] ?: throw IllegalArgumentException("Mandatory parameter '$elementKey' for structure $this not found")
             bytesWritten += elementType.write(buffer, element)
@@ -31,7 +40,15 @@ open class Structure(private val elements: Array<Pair<String, Type<Any>>>) : Typ
         return bytesWritten
     }
 
-    override fun size(): Int = SIZE_UNDEFINED
+    override fun size(): Int {
+        var size = 0
+        for ((_, type) in elements) {
+            val elementSize = type.size()
+            if (elementSize == SIZE_UNDEFINED) return SIZE_UNDEFINED
+            size += elementSize
+        }
+        return size
+    }
 
     companion object {
 
