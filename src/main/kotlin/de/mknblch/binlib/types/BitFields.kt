@@ -12,6 +12,8 @@ import kotlin.experimental.and
  */
 class BitFields(val elements: Array<Pair<String, BitField<Any>>>) : MapType {
 
+    override fun getKeys(): List<String> = elements.map { it.first }
+
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         requireState(buffer.hasRemaining(size())) {
             "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})"

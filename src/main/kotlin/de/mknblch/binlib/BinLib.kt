@@ -46,7 +46,10 @@ class BinLib {
     /**
      * special interface for map types like Structures and BitFields
      */
-    interface MapType : Type<Map<String, Any>>
+    interface MapType : Type<Map<String, Any>> {
+
+        fun getKeys(): List<String>
+    }
 
 
 

@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 
 // Struct type
 open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
+    override fun getKeys(): List<String> = elements.map { it.first }
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         val map = mutableMapOf<String, Any>()

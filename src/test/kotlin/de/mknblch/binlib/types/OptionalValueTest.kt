@@ -37,4 +37,13 @@ class OptionalValueTest {
         assertEquals(23, map["i8"])
         assertNull(map["opt"])
     }
+
+    @Test
+    fun testEmptyOpt() {
+        val buffer = ByteBuffer.allocate(0)
+        val map = struct("empty" to OptionalValue(Int8)).read(buffer)
+        assertNull(map["empty"])
+    }
+
+
 }

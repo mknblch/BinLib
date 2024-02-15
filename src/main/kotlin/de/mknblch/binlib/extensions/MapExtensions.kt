@@ -1,5 +1,8 @@
 package de.mknblch.binlib.extensions
 
+import de.mknblch.binlib.BinLib
+import de.mknblch.binlib.types.Structure
+
 fun Map<String, Any>.flatten(keyMerger: (String, String) -> String, recursive: Boolean = true): Map<String, Any> {
     val result = mutableMapOf<String, Any>()
 
@@ -20,3 +23,17 @@ fun Map<String, Any>.flatten(keyMerger: (String, String) -> String, recursive: B
 }
 
 fun Map<String, Any>.flatten(delimiter: String = ".", recursive: Boolean = true) = this.flatten({ a, b -> "$a$delimiter$b" }, recursive)
+
+@Suppress("UNCHECKED_CAST")
+fun <K : Any> MutableMap<K, Any>.putRecursive(keys: List<K>, value: Any): Any? {
+    if (keys.size == 1)  return this.put(keys[0], value)
+    return (computeIfAbsent(keys[0]) {
+        mutableMapOf<K, Any>()
+    } as MutableMap<K, Any>).putRecursive(keys.drop(1), value)
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <K: Any?> Map<K, Any>.getRecursive(keys: List<K>): Any? {
+    if (keys.size == 1) return this[keys[0]]
+    return (this[keys[0]] as Map<K, Any>).getRecursive(keys.drop(1))
+}
