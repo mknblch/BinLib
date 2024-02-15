@@ -1,5 +1,6 @@
 package de.mknblch.binlib.types.primitives
 
+import de.mknblch.binlib.BinLib.Companion.decorate
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.nio.ByteBuffer

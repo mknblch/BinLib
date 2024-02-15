@@ -16,7 +16,7 @@ class BitFields(val elements: Array<Pair<String, BitField<Any>>>) : MapType {
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         requireState(buffer.hasRemaining(size())) {
-            "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})"
+            "BufferUnderflow($buffer) in BitFields (${buffer.remaining()}/${size()})"
         }
         val result = mutableMapOf<String, Any>()
         var bitOffset = 0
@@ -32,7 +32,7 @@ class BitFields(val elements: Array<Pair<String, BitField<Any>>>) : MapType {
     override fun write(buffer: ByteBuffer, value: Map<String, Any>): Int {
         val numBits = elements.sumOf { it.second.numBits }
         val numBytes = (numBits + 7) / 8
-        requireState(buffer.hasRemaining(numBytes)) { "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/$numBytes)" }
+        requireState(buffer.hasRemaining(numBytes)) { "BufferUnderflow($buffer) in BitFields (${buffer.remaining()}/$numBytes)" }
         val array = BooleanArray(numBits)
         var bitOffset = 0
         for ((elementKey, bitField) in elements) {

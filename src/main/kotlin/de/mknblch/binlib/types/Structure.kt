@@ -28,13 +28,14 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
             if (elementType is None) continue // skip none
             // handle optionals
             if (elementType is OptionalValue<*>) {
-                value[elementKey]?.also {
+                // skip only if neither value nor defaultValue is present
+                (value[elementKey] ?: elementType.defaultValue)?.also {
                     bytesWritten += elementType.write(buffer, it)
                 }
                 continue
             }
             // handle rest
-            requireState(buffer.hasRemaining(elementType.size())) { "BufferOverflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})" }
+            requireState(buffer.hasRemaining(elementType.size())) { "BufferOverflow($buffer) in Structure (${buffer.remaining()}/${size()})" }
             val element = value[elementKey] ?: throw IllegalArgumentException("Mandatory parameter '$elementKey' for structure $this not found")
             bytesWritten += elementType.write(buffer, element)
         }

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 class ArrayType<T : Any>(val length: Int, val type: BinLib.Type<T>) : BinLib.Type<List<T?>> {
 
     override fun read(buffer: ByteBuffer): List<T?> {
-        requireState(buffer.hasRemaining(size())) { "BufferUnderflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})" }
+        requireState(buffer.hasRemaining(size())) { "BufferUnderflow($buffer) in ArrayType (${buffer.remaining()}/${size()})" }
         val list = mutableListOf<T?>()
         for (i in 0..<length) {
             list.add(type.read(buffer))
@@ -20,7 +20,7 @@ class ArrayType<T : Any>(val length: Int, val type: BinLib.Type<T>) : BinLib.Typ
     }
 
     override fun write(buffer: ByteBuffer, value: List<T?>): Int {
-        requireState(buffer.hasRemaining(size())) { "BufferOverflow($buffer) in ${this.signature()} (${buffer.remaining()}/${size()})" }
+        requireState(buffer.hasRemaining(size())) { "BufferOverflow($buffer) in ArrayType (${buffer.remaining()}/${size()})" }
         return value.indices.sumOf { i ->
             val element = value[i] ?: throw IllegalArgumentException("Element at index '$i' in $this was null")
             type.write(buffer, element)

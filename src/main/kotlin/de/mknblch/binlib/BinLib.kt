@@ -34,13 +34,6 @@ class BinLib {
          * @return size of the type in bytes or -1 if unknown
          */
         fun size(): Int
-
-        fun signature(): String {
-            val className = this::class.simpleName ?: "?"
-            val typeParams = this::class.typeParameters
-            return if (typeParams.isEmpty()) className else
-                "$className <${typeParams.joinToString { it.name }}>"
-        }
     }
 
     /**
