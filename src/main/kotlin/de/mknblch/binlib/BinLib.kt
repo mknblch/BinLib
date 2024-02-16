@@ -2,6 +2,7 @@ package de.mknblch.binlib
 
 import de.mknblch.binlib.types.ArrayType
 import de.mknblch.binlib.types.BitFields
+import de.mknblch.binlib.types.OptionalValue
 import de.mknblch.binlib.types.Structure
 import de.mknblch.binlib.types.primitives.ByteArrayType
 import java.nio.ByteBuffer
@@ -34,6 +35,12 @@ class BinLib {
          * @return size of the type in bytes or -1 if unknown
          */
         fun size(): Int
+
+        /**
+         * transforms a type into an optional type
+         * @see de.mknblch.binlib.types.OptionalValue
+         */
+        fun asOptional(): OptionalValue<T> = OptionalValue(this)
     }
 
     /**

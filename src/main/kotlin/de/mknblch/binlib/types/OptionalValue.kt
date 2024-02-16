@@ -5,7 +5,8 @@ import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
 import de.mknblch.binlib.extensions.hasRemaining
 import java.nio.ByteBuffer
 
-class OptionalValue<T : Any>(val type: BinLib.Type<T>, val defaultValue: T? = null) : BinLib.Type<T?> {
+// TODO doc
+class OptionalValue<T : Any?>(val type: BinLib.Type<T>, val defaultValue: T? = null) : BinLib.Type<T?> {
 
     override fun read(buffer: ByteBuffer): T? {
         return when {
