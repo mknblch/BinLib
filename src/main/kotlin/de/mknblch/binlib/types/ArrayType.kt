@@ -14,7 +14,6 @@ class ArrayType<T : Any>(val length: Int? = null, val type: BinLib.Type<T>) : Bi
         requireState(buffer.hasRemaining(size())) { "BufferUnderflow($buffer) in ArrayType (${buffer.remaining()}/${size()})" }
         val list = mutableListOf<T?>()
         if (length == null) {
-            // TODO sizecheck 0 in hasRemaining
             while (buffer.hasRemaining(type.size()) ) list.add(type.read(buffer))
         } else {
             for (i in 0..<length) list.add(type.read(buffer))

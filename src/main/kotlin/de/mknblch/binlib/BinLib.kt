@@ -41,10 +41,21 @@ class BinLib {
          * @see de.mknblch.binlib.types.OptionalValue
          */
         fun asOptional(): OptionalValue<T> = OptionalValue(this)
+
+
+        fun <O: Any> decorate(
+            readDecorator: (T) -> O,
+            writeDecorator: (O) -> T
+        ): TypeDecorator<T, O> {
+            return object : TypeDecorator<T, O>(this) {
+                override fun decorateRead(input: T): O = readDecorator(input)
+                override fun decorateWrite(input: O): T = writeDecorator(input)
+            }
+        }
     }
 
     /**
-     * special interface for map types like Structures and BitFields
+     * interface for map types like Structures and BitFields
      */
     interface MapType : Type<Map<String, Any>> {
 
@@ -68,13 +79,24 @@ class BinLib {
          */
         abstract fun encode(value: Any): BooleanArray
 
+        fun <O: Any> decorate(
+            readDecorator: (T) -> O,
+            writeDecorator: (O) -> T
+        ): BitFieldDecorator<T, O> {
+            return object : BitFieldDecorator<T, O>(this) {
+                override fun decorateRead(input: T): O = readDecorator(input)
+
+                @Suppress("UNCHECKED_CAST")
+                override fun decorateWrite(input: Any): T = writeDecorator(input as O)
+            }
+        }
 
     }
 
     /**
      * type decorator
      */
-    abstract class TypeDecorator<I: Any, O: Any>(private val parent: Type<I>) : Type<O> {
+    abstract class TypeDecorator<I: Any?, O: Any>(private val parent: Type<I>) : Type<O> {
 
         override fun read(buffer: ByteBuffer): O = decorateRead(parent.read(buffer))
         override fun write(buffer: ByteBuffer, value: O): Int = parent.write(buffer, decorateWrite(value))
@@ -118,31 +140,10 @@ class BinLib {
 
         fun bitfield(vararg types: Pair<String, BitField<*>>): BitFields = BitFields.build(types.toList())
 
-        fun <T: Any> array(length: Int, type: Type<T>) = ArrayType(length, type)
+        fun <T: Any> array(length: Int?, type: Type<T>) = ArrayType(length, type)
 
         fun byteArray(length: Int? = null) = ByteArrayType(length)
 
-        fun <I: Any, O: Any> BitField<I>.decorate(
-            readDecorator: (I) -> O,
-            writeDecorator: (O) -> I
-        ): BitFieldDecorator<I, O> {
-            return object : BitFieldDecorator<I, O>(this) {
-                override fun decorateRead(input: I): O = readDecorator(input)
-
-                @Suppress("UNCHECKED_CAST")
-                override fun decorateWrite(input: Any): I = writeDecorator(input as O)
-            }
-        }
-
-        fun <I: Any, O: Any> Type<I>.decorate(
-            readDecorator: (I) -> O,
-            writeDecorator: (O) -> I
-        ): TypeDecorator<I, O> {
-            return object : TypeDecorator<I, O>(this) {
-                override fun decorateRead(input: I): O = readDecorator(input)
-                override fun decorateWrite(input: O): I = writeDecorator(input)
-            }
-        }
 
         /**
          * transform a boolean array into a Long using 2-complement

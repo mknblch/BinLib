@@ -2,7 +2,6 @@ package de.mknblch.binlib
 
 import de.mknblch.binlib.BinLib.Companion.array
 import de.mknblch.binlib.BinLib.Companion.bitfield
-import de.mknblch.binlib.BinLib.Companion.decorate
 import de.mknblch.binlib.BinLib.Companion.struct
 import de.mknblch.binlib.extensions.flatten
 import de.mknblch.binlib.extensions.toHex
