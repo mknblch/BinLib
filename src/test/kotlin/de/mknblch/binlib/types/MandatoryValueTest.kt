@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 class MandatoryValueTest {
 
     @Test
-    fun test() {
+    fun testWrite() {
         val buffer = ByteBuffer.allocate(2)
 
         val struct = struct(
@@ -35,7 +35,7 @@ class MandatoryValueTest {
     }
 
     @Test
-    fun test2() {
+    fun testFail() {
         val buffer = ByteBuffer.allocate(2)
         val struct1 = struct(
             "m" to MandatoryValue(Int8, 42),

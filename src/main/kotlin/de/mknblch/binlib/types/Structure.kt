@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 
 // Struct type
 open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
+
     override fun getKeys(): List<String> = elements.map { it.first }
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
@@ -32,6 +33,11 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
                 (value[elementKey] ?: elementType.defaultValue)?.also {
                     bytesWritten += elementType.write(buffer, it)
                 }
+                continue
+            }
+            if (elementType is MandatoryValue<*>) {
+                // always write a mandatory value, even if value is missing in the arguments
+                bytesWritten += elementType.write(buffer, true)
                 continue
             }
             // handle rest
