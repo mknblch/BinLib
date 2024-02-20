@@ -16,23 +16,28 @@ and data serialization/deserialization with precise control over the binary form
 
 ### Kotlin example
 
+```kotin
     import de.mknblch.binlib.BinLib;
     import java.nio.ByteBuffer;
     
     fun main() {
+    
         // sub structure
         val int3Struct: Structure = struct(
             "i32" to Int32,
             "i16" to Int16,
             "i8" to Int8,
         )
+        
         // parent structure
         val parentStruct = struct(
             "i8" to Int8,
             "struct" to int3Struct,
         )
-        // 4 +2 +1 +1 = 8 byte
+        
+        // allocate 4 +2 +1 +1 = 8 byte
         val buffer = ByteBuffer.allocate(8)
+        
         // write data
         parentStruct.write(buffer, mapOf(
             "struct" to mapOf<String, Any>(
@@ -44,11 +49,14 @@ and data serialization/deserialization with precise control over the binary form
 
         // prepare buffer for reading
         buffer.flip()
+        
         // read data and flatten the map
         val map = parentStruct.read(buffer).flatten(".")
-        // assert
+        
+        // asserts
         assertEquals(0x0FFFFFF1, map["struct.i32"])
         assertEquals(0x0FF1, map["struct.i16"])
         assertEquals(0x01, map["struct.i8"])
         assertEquals(0x10, map["i8"])
     }
+```
