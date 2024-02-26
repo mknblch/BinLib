@@ -3,7 +3,6 @@ package de.mknblch.binlib.types
 import de.mknblch.binlib.BinLib.*
 import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
 import de.mknblch.binlib.BinLib.Companion.requireState
-import de.mknblch.binlib.extensions.hasRemaining
 import de.mknblch.binlib.types.primitives.None
 import java.nio.ByteBuffer
 
@@ -28,22 +27,40 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
             // handle none
             if (elementType is None) continue // skip none
             // handle optionals
-            if (elementType is OptionalValue<*>) {
-                // skip only if neither value nor defaultValue is present
-                (value[elementKey] ?: elementType.defaultValue)?.also {
-                    bytesWritten += elementType.write(buffer, it)
+            when (elementType) {
+
+                // argument optional, skip if neither value nor defaultValue is present
+                is OptionalValue<*> -> {
+                    (value[elementKey] ?: elementType.defaultValue)?.also {
+                        bytesWritten += elementType.write(buffer, it)
+                    }
+                    continue
                 }
-                continue
+
+                // argument optional, always writes its default value
+                is MandatoryValue<*> -> {
+                    // always write a mandatory value, even if value is missing in the arguments
+                    bytesWritten += elementType.write(buffer, true)
+                    continue
+                }
+
+                // argument optional but writes its default value if not null
+                is DefaultWrite<*> -> {
+                    val element = value[elementKey]
+                    bytesWritten += if (element == null) {
+                        elementType.write(buffer, null)
+                    } else {
+                        elementType.write(buffer, element)
+                    }
+                    continue
+                }
+
+                // handle rest, throw exception if argument is not provided
+                else -> {
+                    val element = value[elementKey] ?: throw IllegalArgumentException("Mandatory parameter '$elementKey' for structure $this not found")
+                    bytesWritten += elementType.write(buffer, element)
+                }
             }
-            if (elementType is MandatoryValue<*>) {
-                // always write a mandatory value, even if value is missing in the arguments
-                bytesWritten += elementType.write(buffer, true)
-                continue
-            }
-            // handle rest
-            requireState(buffer.hasRemaining(elementType.size())) { "BufferOverflow($buffer) in Structure (${buffer.remaining()}/${size()})" }
-            val element = value[elementKey] ?: throw IllegalArgumentException("Mandatory parameter '$elementKey' for structure $this not found")
-            bytesWritten += elementType.write(buffer, element)
         }
         return bytesWritten
     }

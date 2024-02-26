@@ -1,9 +1,6 @@
 package de.mknblch.binlib
 
-import de.mknblch.binlib.types.ArrayType
-import de.mknblch.binlib.types.BitFields
-import de.mknblch.binlib.types.OptionalValue
-import de.mknblch.binlib.types.Structure
+import de.mknblch.binlib.types.*
 import de.mknblch.binlib.types.primitives.ByteArrayType
 import java.nio.ByteBuffer
 import kotlin.experimental.or
@@ -42,7 +39,21 @@ class BinLib {
          */
         fun asOptional(): OptionalValue<T> = OptionalValue(this)
 
+        /**
+         * transforms a type into an DefaultWrite
+         * @see DefaultWrite
+         */
+        fun asDefaultWrite(defaultValue: T): DefaultWrite<T> = DefaultWrite(this, defaultValue)
 
+        /**
+         * transforms a type into a MandatoryValue
+         * @see MandatoryValue
+         */
+        fun asMandatoryValue(defaultValue: T): MandatoryValue<T> = MandatoryValue(this, defaultValue)
+
+        /**
+         * decorate the given type
+         */
         fun <O: Any> decorate(
             readDecorator: (T) -> O,
             writeDecorator: (O) -> T

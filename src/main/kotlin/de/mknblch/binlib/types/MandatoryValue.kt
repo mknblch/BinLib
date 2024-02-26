@@ -9,8 +9,7 @@ import java.nio.ByteBuffer
 
 /**
  * Provides a way to validate incoming binary data while parsing it. An exception is thrown if mandatoryValue is not
- * equal to the parsed value. Always writes the mandatory value without evaluating the actual boolean argument. Yet
- * a boolean value has to be supplied
+ * equal to the parsed value. Always writes the mandatory value without evaluating the actual boolean argument.
  */
 class MandatoryValue<T : Any?>(val type: BinLib.Type<T>, private val mandatoryValue: T) : BinLib.Type<Boolean> {
 
