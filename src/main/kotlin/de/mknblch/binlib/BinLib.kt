@@ -40,7 +40,7 @@ class BinLib {
         fun asOptional(): OptionalValue<T> = OptionalValue(this)
 
         /**
-         * transforms a type into an DefaultWrite
+         * transforms a type into a DefaultWrite
          * @see DefaultWrite
          */
         fun asDefaultWrite(defaultValue: T): DefaultWrite<T> = DefaultWrite(this, defaultValue)
@@ -52,7 +52,7 @@ class BinLib {
         fun asMandatoryValue(defaultValue: T): MandatoryValue<T> = MandatoryValue(this, defaultValue)
 
         /**
-         * decorate the given type
+         * decorate the type
          */
         fun <O: Any> decorate(
             readDecorator: (T) -> O,
@@ -155,6 +155,9 @@ class BinLib {
 
         fun byteArray(length: Int? = null) = ByteArrayType(length)
 
+        fun <T : Any> optional(type: Type<T>, defaultValue: T? = null): OptionalValue<T> {
+            return OptionalValue<T>(type, defaultValue)
+        }
 
         /**
          * transform a boolean array into a Long using 2-complement
