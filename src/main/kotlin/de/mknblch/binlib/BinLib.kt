@@ -37,7 +37,7 @@ class BinLib {
          * transforms a type into an optional type
          * @see de.mknblch.binlib.types.OptionalValue
          */
-        fun asOptional(): OptionalValue<T> = OptionalValue(this)
+        fun asOptional(defaultValue: T? = null): OptionalValue<T> = OptionalValue(this, defaultValue)
 
         /**
          * transforms a type into a DefaultWrite
