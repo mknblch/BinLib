@@ -14,29 +14,51 @@ fun ByteBuffer.hasRemaining(size: Int): Boolean {
 /**
  * flatten a map by remapping keys of sub maps
  */
-fun Map<String, Any>.flatten(keyMerger: (String, String) -> String, recursive: Boolean = true): Map<String, Any> {
+fun Map<String, Any>.flatten(keyMerger: (String, String) -> String): Map<String, Any> {
     val result = mutableMapOf<String, Any>()
 
     @Suppress("UNCHECKED_CAST")
-    fun flattenHelper(currentMap: Map<String, Any>, prefix: String?, recursive: Boolean) {
+    fun flattenHelper(currentMap: Map<String, Any>, prefix: String?) {
         for ((key, value) in currentMap) {
             val newKey = if (prefix != null) keyMerger(prefix, key) else key
-            if (value is Map<*, *> && recursive) {
-                flattenHelper(value as Map<String, Any>, newKey, recursive)
+            if (value is Map<*, *>) {
+                flattenHelper(value as Map<String, Any>, newKey)
             } else {
                 result[newKey] = value
             }
         }
     }
 
-    flattenHelper(this, null, recursive)
+    flattenHelper(this, null)
     return result
 }
+
+fun List<Pair<String, Any>>.nest(delimiter: String = "."): Map<String, Any> {
+    val result = mutableMapOf<String, Any>()
+    for ((key, value) in this) {
+        val parts = key.split(delimiter)
+        var currentMap: MutableMap<String, Any> = result
+        // Traverse all parts except the last one
+        for (i in 0 until parts.size - 1) {
+            val existingElement = currentMap.getOrPut(parts[i]) { mutableMapOf<String, Any>() }
+            if (existingElement is MutableMap<*, *>) {
+                currentMap = existingElement as MutableMap<String, Any>
+            } else {
+                throw IllegalArgumentException("Key redefinition in $key")
+            }
+        }
+        // Set the final value
+        val lastKey = parts.last()
+        currentMap[lastKey] = value
+    }
+    return result
+}
+
 
 /**
  * flatten a Map<String, Any> by merging keys using "." as default delimiter
  */
-fun Map<String, Any>.flatten(delimiter: String = ".", recursive: Boolean = true) = this.flatten({ a, b -> "$a$delimiter$b" }, recursive)
+fun Map<String, Any>.flatten(delimiter: String = ".") = this.flatten { a, b -> "$a$delimiter$b" }
 
 /**
  * set a value recursively. if multiple keys are specified a map

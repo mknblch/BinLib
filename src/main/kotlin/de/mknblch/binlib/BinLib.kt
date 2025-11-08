@@ -73,8 +73,6 @@ class BinLib {
         fun getKeys(): List<String>
     }
 
-
-
     /**
      * abstract type for bitfields
      */
@@ -101,7 +99,6 @@ class BinLib {
                 override fun decorateWrite(input: Any): T = writeDecorator(input as O)
             }
         }
-
     }
 
     /**
@@ -144,7 +141,6 @@ class BinLib {
         abstract fun decorateWrite(input: Any): I
     }
 
-
     companion object {
 
         fun struct(vararg types: Pair<String, Type<*>>): Structure = Structure.build(types.toList())
@@ -169,7 +165,7 @@ class BinLib {
             } else {
                 for (i in indices) if (this[i]) r = r or (1L shl i)
             }
-            return if (this[size - 1]) -r - 1 else r
+            return if (this[size - 1]) - r - 1 else r
         }
 
         fun Int.toBooleanArray(size: Int = 32): BooleanArray {
@@ -193,9 +189,8 @@ class BinLib {
             } else {
                 for (i in indices) if (this[i]) r = r or (1 shl i)
             }
-            return if (this[size - 1]) -r - 1 else r
+            return if (this[size - 1]) - r - 1 else r
         }
-
 
         /**
          * transform a boolean array into an UInt
@@ -237,6 +232,5 @@ class BinLib {
         }
 
         const val SIZE_UNDEFINED: Int = -1
-
     }
 }

@@ -3,6 +3,7 @@ package de.mknblch.binlib.types
 import de.mknblch.binlib.BinLib.*
 import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
 import de.mknblch.binlib.BinLib.Companion.requireState
+import de.mknblch.binlib.extensions.nest
 import de.mknblch.binlib.types.primitives.None
 import java.nio.ByteBuffer
 
@@ -13,9 +14,13 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
 
     override fun read(buffer: ByteBuffer): Map<String, Any> {
         val map = mutableMapOf<String, Any>()
-        readStructure(buffer, elements) { k, t, v ->
-            if (t is None) return@readStructure
-            map[k] = v
+        for (i in elements.indices) {
+            val (elementKey, elementType) = elements[i]
+            // if element size is undefined (-1) it will always be smaller the buffer.remaining() (0)
+            requireState (buffer.remaining() >= elementType.size()) {
+                "BufferUnderflow($buffer) in Structure while reading '$elementKey' ($elementType) at index $i" }
+            if (elementType is None) continue;
+            map[elementKey] = elementType.read(buffer)
         }
         return map
     }
@@ -65,6 +70,10 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
         return bytesWritten
     }
 
+    fun write(buffer: ByteBuffer, values: List<Pair<String, Any>>, delimiter: String = ".") {
+        write(buffer, values.nest(delimiter))
+    }
+
     override fun size(): Int {
         var size = 0
         for ((_, type) in elements) {
@@ -80,15 +89,5 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
         @Suppress("UNCHECKED_CAST")
         fun build(elementTypes: List<Pair<String, Type<*>>>): Structure =
             Structure(elementTypes.map { it as Pair<String, Type<Any>> }.toTypedArray())
-
-        inline fun readStructure(buffer: ByteBuffer, elements: Array<Pair<String, Type<Any>>>, receiver: (String, Type<Any>, Any) -> Unit) {
-            for (i in elements.indices) {
-                val (elementKey, elementType) = elements[i]
-                // if element size is undefined (-1) it will always be smaller the buffer.remaining() (0)
-                requireState (buffer.remaining() >= elementType.size()) {
-                    "BufferUnderflow($buffer) in Structure while reading '$elementKey' ($elementType) at index $i" }
-                receiver(elementKey, elementType, elementType.read(buffer))
-            }
-        }
     }
 }
