@@ -2,6 +2,19 @@ package de.mknblch.binlib.extensions
 
 import java.nio.ByteBuffer
 
+
+fun Map<*, *>.render(): String = entries
+    .joinToString(", ", "{", "}") { (k, v) ->
+        val vStr = when (v) {
+            is String -> "\"$v\""
+            is Map<*, *> -> v.render()
+            is List<*> -> v.joinToString(", ", "[", "]") { if (it is String) "\"$it\"" else it.toString() }
+            is Array<*> -> v.joinToString(", ", "[", "]") { if (it is String) "\"$it\"" else it.toString() }
+            else -> v.toString()
+        }
+        "$k=$vStr"
+    }
+
 /**
  * @return true if at least size bytes are available, false otherwise
  * true for values <0 as well
@@ -34,6 +47,27 @@ fun Map<String, Any>.flatten(keyMerger: (String, String) -> String): Map<String,
 }
 
 fun List<Pair<String, Any>>.nest(delimiter: String = "."): Map<String, Any> {
+    val result = mutableMapOf<String, Any>()
+    for ((key, value) in this) {
+        val parts = key.split(delimiter)
+        var currentMap: MutableMap<String, Any> = result
+        // Traverse all parts except the last one
+        for (i in 0 until parts.size - 1) {
+            val existingElement = currentMap.getOrPut(parts[i]) { mutableMapOf<String, Any>() }
+            if (existingElement is MutableMap<*, *>) {
+                currentMap = existingElement as MutableMap<String, Any>
+            } else {
+                throw IllegalArgumentException("Key redefinition in $key")
+            }
+        }
+        // Set the final value
+        val lastKey = parts.last()
+        currentMap[lastKey] = value
+    }
+    return result
+}
+
+fun Map<String, Any>.nest(delimiter: String = "."): Map<String, Any> {
     val result = mutableMapOf<String, Any>()
     for ((key, value) in this) {
         val parts = key.split(delimiter)
