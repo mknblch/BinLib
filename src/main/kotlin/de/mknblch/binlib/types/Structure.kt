@@ -50,7 +50,7 @@ open class Structure(val elements: Array<Pair<String, Type<Any>>>) : MapType {
                 }
 
                 // argument optional but writes its default value if not null
-                is DefaultWrite<*> -> {
+                is DefaultValue<*> -> {
                     val element = value[elementKey]
                     bytesWritten += if (element == null) {
                         elementType.write(buffer, null)

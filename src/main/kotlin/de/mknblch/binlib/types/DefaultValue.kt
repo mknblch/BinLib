@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
 /**
  * defaults to the given value if no argument for this type is provided. does not change read-behaviour
  */
-class DefaultWrite<T : Any?>(val type: BinLib.Type<T>, val defaultValue: T) : BinLib.Type<T?> {
+class DefaultValue<T : Any?>(val type: BinLib.Type<T>, val defaultValue: T) : BinLib.Type<T?> {
 
     override fun read(buffer: ByteBuffer): T? = type.read(buffer)
 

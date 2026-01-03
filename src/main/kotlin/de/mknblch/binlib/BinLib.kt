@@ -40,10 +40,10 @@ class BinLib {
         fun asOptional(defaultValue: T? = null): OptionalValue<T> = OptionalValue(this, defaultValue)
 
         /**
-         * transforms a type into a DefaultWrite
-         * @see DefaultWrite
+         * transforms a type into a DefaultValue
+         * @see DefaultValue
          */
-        fun asDefaultWrite(defaultValue: T): DefaultWrite<T> = DefaultWrite(this, defaultValue)
+        fun defaultsTo(defaultValue: T): DefaultValue<T> = DefaultValue(this, defaultValue)
 
         /**
          * transforms a type into a MandatoryValue
