@@ -7,6 +7,8 @@ import de.mknblch.binlib.types.primitives.Int8
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.nio.ByteBuffer
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class OptionalValueTest {
 

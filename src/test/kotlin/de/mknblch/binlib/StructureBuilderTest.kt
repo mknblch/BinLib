@@ -2,14 +2,15 @@ package de.mknblch.binlib
 
 import de.mknblch.binlib.BinLib.Companion.SIZE_UNDEFINED
 import de.mknblch.binlib.BinLib.Companion.struct
+import de.mknblch.binlib.extensions.toHex
 import de.mknblch.binlib.types.primitives.Ascii
 import de.mknblch.binlib.types.primitives.AsciiDynamic
 import de.mknblch.binlib.types.primitives.Int8
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.ByteBuffer
+import kotlin.test.assertEquals
 
 class StructureBuilderTest {
 
@@ -54,6 +55,20 @@ class StructureBuilderTest {
             .set("i2", 0x0F)
             .set("sub.string", "hello")
             .build()
+        val map = dynStringStruct.read(ByteBuffer.wrap(packet))
+        println(map)
+        assertMapEquals(builder.arguments, map)
+    }
+
+    @Test
+    fun testEmptyDynamicString() {
+        val builder = StructureBuilder(dynStringStruct)
+        val packet = builder
+            .set("i1", 0x0F)
+            .set("i2", 0x0F)
+            .set("sub.string", "")
+            .build()
+        println(packet.toHex())
         val map = dynStringStruct.read(ByteBuffer.wrap(packet))
         println(map)
         assertMapEquals(builder.arguments, map)
