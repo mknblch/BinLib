@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
  * it will read exactly that number of bytes from the buffer. Otherwise, it will read all remaining
  * bytes in the buffer.
  */
-class ByteArrayType(val size: Int?) : BinLib.Type<ByteArray> {
+open class ByteArrayType(val size: Int? = null) : BinLib.Type<ByteArray> {
     override fun read(buffer: ByteBuffer): ByteArray {
         return ByteArray(size ?: buffer.remaining()).also {
             buffer.get(it)
